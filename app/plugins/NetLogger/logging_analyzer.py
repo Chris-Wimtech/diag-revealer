@@ -28,6 +28,7 @@ import threading
 import time
 import urllib
 import urllib2
+import logging
 
 # logging.basicConfig(level=logging.DEBUG,
 #                     format='[%(levelname)s] (%(threadName)-10s) %(message)s',
@@ -146,6 +147,8 @@ class LoggingAnalyzer(Analyzer):
         self.__is_wifi_enabled = False
         self.__log_timestamp = ""
         self.__upload_log_flag = True
+        self.__logger = logging.getLogger('NetLogger2')
+        self.__logger.setLevel(logging.DEBUG)
 
         try:
             if config['privacy'] == '1':
@@ -237,8 +240,8 @@ class LoggingAnalyzer(Analyzer):
         :param msg: the message from trace collector.
         :type msg: Event
         """
-
         # when a new log comes, save it to external storage and upload
+        self.log_info('NetLogger2 message: %s ' % msg.type_id)
         if msg.type_id.find("new_diag_log") != -1:
             self.__log_timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             self.__orig_file = msg.data.decode().get("filename")
@@ -266,27 +269,36 @@ class LoggingAnalyzer(Analyzer):
 
         if self.__is_dec_log is True:
             if self.__dec_log_type == "LTE Control Plane":
-                if (msg.type_id.startswith("LTE_RRC")
-                        or msg.type_id.startswith("LTE_NAS")):
+                if (msg.type_id.startswith("LTE_RRC") or msg.type_id.startswith("LTE_NAS")):
                     self._decode_msg(msg)
+                # else:
+                    # self.__log_undecoded(msg)
             elif self.__dec_log_type == "LTE Control/Data Plane":
-                if (msg.type_id.startswith("LTE")
-                        and not msg.type_id.startswith("LTE_PHY")):
+                if (msg.type_id.startswith("LTE") and not msg.type_id.startswith("LTE_PHY")):
                     self._decode_msg(msg)
+                # else:
+                    # self.__log_undecoded(msg)
             elif self.__dec_log_type == "LTE Control/Data/PHY":
                 if (msg.type_id.startswith("LTE")):
                     self._decode_msg(msg)
+                # else:
+                    # self.__log_undecoded(msg)
             elif self.__dec_log_type == "LTE/3G Control Plane":
                 if ("RRC" in msg.type_id or "NAS" in msg.type_id):
                     self._decode_msg(msg)
+                # else:
+                    # self.__log_undecoded(msg)
             elif self.__dec_log_type == "All":
-                if (msg.type_id.startswith("LTE") or msg.type_id.startswith(
-                        "WCDMA") or msg.type_id.startswith("UMTS")):
+                if (msg.type_id.startswith("LTE") or msg.type_id.startswith("WCDMA") or msg.type_id.startswith("UMTS")):
                     self._decode_msg(msg)
+                # else:
+                    # self.__log_undecoded(msg)
             else:
                 pass
+                # self.__log_undecoded(msg)
         else:
             pass
+            # self.__log_undecoded(msg)
 
     def _decode_msg(self, msg):
         self.__raw_msg[self.__msg_cnt] = msg.data
@@ -306,7 +318,7 @@ class LoggingAnalyzer(Analyzer):
             self.__dec_log_path = os.path.join(
                 self.__dec_log_dir, self.__dec_log_name)
             self.log_info(
-                "NetLogger: decoded cellular log being saved to %s, please check." %
+                "NetLogger2: decoded cellular log being saved to %s, please check." %
                 self.__dec_log_path)
             self.__raw_msg.clear()  # reset the dict
             self.__msg_cnt = 0

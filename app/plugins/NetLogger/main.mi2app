@@ -94,7 +94,7 @@ try:
         except IOError:
             src.enable_log(lte_lvl1 + wcdma + umts)
             src.log_warning(
-                "NetLogger: config file open failed, use default LTE/3G Control Plane logs")
+                "NetLogger2: config file open failed, use default LTE/3G Control Plane logs")
             shutil.copyfile(
                 os.path.join(
                     mi2app_utils.get_files_dir(),
@@ -102,7 +102,7 @@ try:
                     cfg_file),
                 cfg_path)
             src.log_info(
-                "NetLogger: config file copied to %s, you can edit it for collection next time" %
+                "NetLogger2: config file copied to %s, you can edit it for collection next time" %
                 cfg_path)
 
     loggingAnalyzer = LoggingAnalyzer(plugin_config)
